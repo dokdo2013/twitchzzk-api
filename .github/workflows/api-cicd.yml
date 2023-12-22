@@ -49,7 +49,7 @@ jobs:
 
       - name: Update deployment tag in GitOps repo
         run: |
-          FOLDER_NAME="gitops/apps/haenu/twitchzzk-api"
+          FOLDER_NAME="gitops/apps/haenu"
           APP_NAME="twitchzzk-api"
           cd ${FOLDER_NAME}/${APP_NAME}
           sed -i "s|image: hyeonwoo5342/${APP_NAME}:.*|image: hyeonwoo5342/${APP_NAME}:${{ github.run_number }}|g" deployment.yaml
