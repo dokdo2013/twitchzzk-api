@@ -31,7 +31,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           file: "api/Dockerfile"
-          context: .
+          context: ./api
           push: true
           tags: hyeonwoo5342/twitchzzk-api:${{ github.run_number }}
 
