@@ -1,6 +1,4 @@
-export class GetChannelByIdParamsDto {
-  /**
-   * Channel ID
-   */
-  channelId: string;
-}
+import { CommonGetByIdParamsDto } from './common.dto';
+
+export class GetChannelByIdParamsDto extends CommonGetByIdParamsDto {}
+export class GetLiveStatusByIdParamsDto extends CommonGetByIdParamsDto {}

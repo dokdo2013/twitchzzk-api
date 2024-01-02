@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import axios from 'axios';
 import { CommonOptionsDto } from './dto/common.dto';
-import { GetChannelByIdParamsDto } from './dto/params.dto';
+import {
+  GetChannelByIdParamsDto,
+  GetLiveStatusByIdParamsDto,
+} from './dto/params.dto';
 import {
   ChzzkChannel,
   ChzzkGetChannelResponse,
-} from './dto/response.interface';
+  ChzzkGetLiveStatusResponse,
+  ChzzkLiveStatus,
+} from './dto/response.dto';
 
 @Injectable()
 export class ChzzkService {
@@ -42,6 +47,38 @@ export class ChzzkService {
         return {
           content: null,
         } as ChzzkGetChannelResponse;
+      });
+
+    return response.content;
+  }
+
+  /**
+   * Get Chzzk Channel Live Status by Channel ID
+   * @param params
+   * @param options
+   * @returns ChzzkLiveStatus | null
+   */
+  async getLiveStatusById(
+    params: GetLiveStatusByIdParamsDto,
+    options?: CommonOptionsDto,
+  ): Promise<ChzzkLiveStatus> {
+    const apiUrl = `https://api.chzzk.naver.com/polling/v1/channels/${params.channelId}/live-status`;
+
+    const response = await axios
+      .get(apiUrl)
+      .then((response) => {
+        return response.data as ChzzkGetLiveStatusResponse;
+      })
+      .catch((error) => {
+        if (options?.throwException) {
+          throw new NotFoundException('채널을 찾을 수 없습니다.');
+        }
+
+        console.log(error);
+
+        return {
+          content: null,
+        } as ChzzkGetLiveStatusResponse;
       });
 
     return response.content;

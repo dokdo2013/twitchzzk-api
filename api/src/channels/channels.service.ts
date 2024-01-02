@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TwitchGetChannelDto } from './dto/get-channel.dto';
-import { ChzzkChannel } from 'src/chzzk/dto/response.interface';
+import { ChzzkChannel } from 'src/chzzk/dto/response.dto';
 
 @Injectable()
 export class ChannelsService {

@@ -21,7 +21,7 @@ import { NotImplementedExceptionImplementSoonResponse } from 'src/common/common-
 import { TwitchGetChannelResponseDto } from './dto/get-channel.dto';
 import { ChzzkService } from 'src/chzzk/chzzk.service';
 import { GetChannelByIdParamsDto } from 'src/chzzk/dto/params.dto';
-import { ChzzkChannel } from 'src/chzzk/dto/response.interface';
+import { ChzzkChannel } from 'src/chzzk/dto/response.dto';
 
 @Controller('helix/channels')
 @ApiTags('Channels')
