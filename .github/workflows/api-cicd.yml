@@ -1,6 +1,4 @@
-# Example Workflow (Just Dockerfile Build)
-
-name: CI/CD to Haenu Cluster
+name: CI/CD to Haenu Cluster (API)
 
 on:
   push:

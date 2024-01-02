@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   NotImplementedException,
   ParseArrayPipe,
   Patch,
@@ -16,60 +17,36 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  NotImplementedExceptionImplementSoonResponse,
-  NotImplementedExceptionWontImplementResponse,
-} from 'src/common/common-response.dto';
-import {
-  getChannelDto,
-  twitchGetChannelResponseDto,
-} from './dto/get-channel.dto';
+import { NotImplementedExceptionImplementSoonResponse } from 'src/common/common-response.dto';
+import { TwitchGetChannelResponseDto } from './dto/get-channel.dto';
+import { ChzzkService } from 'src/chzzk/chzzk.service';
+import { GetChannelByIdParamsDto } from 'src/chzzk/dto/params.dto';
+import { ChzzkChannel } from 'src/chzzk/dto/response.interface';
 
 @Controller('helix/channels')
 @ApiTags('Channels')
 export class ChannelsController {
-  constructor(private readonly channelsService: ChannelsService) {}
+  constructor(
+    private readonly channelsService: ChannelsService,
+    private readonly chzzkService: ChzzkService,
+  ) {}
 
   @Post('commercial')
   @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Start Commercial',
-  })
-  @ApiNotImplementedResponse({
-    description: 'WONT_IMPLEMENT',
-    type: NotImplementedExceptionWontImplementResponse,
-  })
   async commercial() {
     throw new NotImplementedException('WONT_IMPLEMENT');
-    // return await this.channelsService.commercial();
   }
 
   @Get('ads')
   @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Get Ad Schedule',
-  })
-  @ApiNotImplementedResponse({
-    description: 'WONT_IMPLEMENT',
-    type: NotImplementedExceptionWontImplementResponse,
-  })
   async ads() {
     throw new NotImplementedException('WONT_IMPLEMENT');
-    // return await this.channelsService.ads();
   }
 
   @Post('ads/schedule/snooze')
   @ApiExcludeEndpoint()
-  @ApiOperation({
-    summary: 'Snooze Next Ad',
-  })
-  @ApiNotImplementedResponse({
-    description: 'WONT_IMPLEMENT',
-    type: NotImplementedExceptionWontImplementResponse,
-  })
   async adsScheduleSnooze() {
     throw new NotImplementedException('WONT_IMPLEMENT');
-    // return await this.channelsService.adsScheduleSnooze();
   }
 
   @Get('')
@@ -78,7 +55,7 @@ export class ChannelsController {
   })
   @ApiOkResponse({
     description: 'OK',
-    type: twitchGetChannelResponseDto,
+    type: TwitchGetChannelResponseDto,
   })
   @ApiQuery({
     name: 'broadcaster_id',
@@ -87,14 +64,32 @@ export class ChannelsController {
     type: [String],
     description: '채널 ID 여러 개를 입력합니다',
   })
-  async getChannelInformation(
+  async getChannel(
     @Query('broadcaster_id', ParseArrayPipe) broadcaster_ids: string[],
   ) {
     const chzzkResults = (await Promise.all(
       broadcaster_ids.map(async (id) => {
-        return (await this.channelsService.getChannel(id)).content;
+        const params: GetChannelByIdParamsDto = {
+          channelId: id,
+        };
+        return await this.chzzkService.getChannelById(params);
       }),
-    )) as getChannelDto[];
+    )) as ChzzkChannel[];
+
+    // chzzkResults가 null인 경우에 대한 처리
+    const chzzkResultsFiltered = chzzkResults.filter((chzzkResult) => {
+      return chzzkResult !== null;
+    });
+
+    console.log(chzzkResultsFiltered);
+
+    if (chzzkResultsFiltered.length === 0) {
+      // chzzkResultsFiltered가 빈 배열인 경우
+      // 즉, chzzkResults가 모두 null인 경우
+      // 채널을 찾을 수 없다는 에러를 던짐
+
+      throw new NotFoundException('채널을 찾을 수 없습니다.');
+    }
 
     const twitchResults = chzzkResults.map((chzzkResult) => {
       return this.channelsService.getChannelConverter(chzzkResult);
@@ -102,7 +97,7 @@ export class ChannelsController {
 
     const response = {
       data: twitchResults,
-    } as twitchGetChannelResponseDto;
+    } as TwitchGetChannelResponseDto;
 
     return response;
   }
