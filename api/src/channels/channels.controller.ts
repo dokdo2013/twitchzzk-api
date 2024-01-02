@@ -67,8 +67,10 @@ export class ChannelsController {
   async getChannel(
     @Query('broadcaster_id', ParseArrayPipe) broadcaster_ids: string[],
   ) {
+    const uniqueBroadcasterIds = [...new Set(broadcaster_ids)];
+
     const chzzkResults = (await Promise.all(
-      broadcaster_ids.map(async (id) => {
+      uniqueBroadcasterIds.map(async (id) => {
         const params: GetChannelByIdParamsDto = {
           channelId: id,
         };
@@ -81,13 +83,7 @@ export class ChannelsController {
       return chzzkResult !== null;
     });
 
-    console.log(chzzkResultsFiltered);
-
     if (chzzkResultsFiltered.length === 0) {
-      // chzzkResultsFiltered가 빈 배열인 경우
-      // 즉, chzzkResults가 모두 null인 경우
-      // 채널을 찾을 수 없다는 에러를 던짐
-
       throw new NotFoundException('채널을 찾을 수 없습니다.');
     }
 
